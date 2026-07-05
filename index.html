@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>風読 v1.0</title>
+<style>
+:root{--bg:#f4f8fb;--card:#fff;--text:#15202b;--muted:#667085;--line:#d8e2ea;--main:#0f6f85;--main2:#0b5364;--danger:#b42318;--ok:#027a48;--warn:#b54708;--soft:#e6f3f6}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:84px}.wrap{max-width:760px;margin:0 auto;padding:18px 14px 24px}.hero{background:linear-gradient(135deg,var(--main),#173b55);color:white;border-radius:24px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.12)}.hero h1{margin:0;font-size:32px;letter-spacing:.04em}.hero p{margin:8px 0 0;color:#d9f4f8}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-top:14px;box-shadow:0 4px 14px rgba(16,24,40,.04)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px;color:#344054}input,select,textarea{width:100%;font-size:16px;border:1px solid var(--line);border-radius:14px;padding:12px;background:white;color:var(--text)}textarea{min-height:78px}.btn{border:0;border-radius:16px;padding:13px 14px;font-weight:800;font-size:16px;background:var(--main);color:white;width:100%;margin-top:12px}.btn.secondary{background:#eef6f8;color:var(--main2);border:1px solid #cbe4ea}.btn.danger{background:#fff1f0;color:var(--danger);border:1px solid #ffccc7}.pill{display:inline-flex;gap:6px;align-items:center;background:var(--soft);color:var(--main2);border-radius:999px;padding:7px 10px;font-weight:700;font-size:13px;margin:4px 4px 0 0}.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);max-width:760px;margin:0 auto}.tab{padding:10px 4px 14px;text-align:center;color:var(--muted);font-size:12px;font-weight:800}.tab.active{color:var(--main)}.screen{display:none}.screen.active{display:block}.stat{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat div{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:12px}.stat b{display:block;font-size:24px}.muted{color:var(--muted);font-size:13px}.log{border-top:1px solid var(--line);padding:12px 0}.log:first-child{border-top:0}.log h3{margin:0 0 6px;font-size:16px}.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800}.ok{background:#ecfdf3;color:var(--ok)}.ng{background:#fff1f0;color:var(--danger)}.warn{background:#fffaeb;color:var(--warn)}.hidden{display:none}.small{font-size:12px}.topActions{display:flex;gap:8px}.topActions .btn{margin-top:0}.note{background:#fffaeb;border:1px solid #fedf89;color:#7a2e0e;border-radius:16px;padding:12px;font-size:14px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="home" class="screen active">
+    <div class="hero"><h1>風読</h1><p>風予報ではなく、現地の風を読む。v1.0</p></div>
+    <div class="card stat"><div><span class="muted">保存ログ</span><b id="count">0</b></div><div><span class="muted">釣行可能率</span><b id="goRate">-</b></div></div>
+    <div class="card"><h2>今日やること</h2><p>釣行前に予報を入力。現地で「実際どうだったか」を保存。明日は入力しやすさの確認が目的です。</p><button class="btn" onclick="show('input')">データ入力へ</button><button class="btn secondary" onclick="exportCSV()">CSVを書き出す</button></div>
+    <div class="card"><h2>最新ログ</h2><div id="latest" class="muted">まだ記録がありません。</div></div>
+    <div class="note">保存先はこのiPhone/Safari内です。Safariの履歴・サイトデータを消すと消える可能性があります。釣行後はCSV出力してください。</div>
+  </section>
+
+  <section id="input" class="screen">
+    <div class="hero"><h1>入力</h1><p>30〜60秒で記録</p></div>
+    <div class="card">
+      <div class="row"><div><label>日時</label><input id="dt" type="datetime-local"></div><div><label>釣種</label><select id="style"><option>イカメタル</option><option>エギング</option><option>ティップラン</option><option>ショアジギング</option><option>その他</option></select></div></div>
+      <label>場所名</label><input id="place" placeholder="例：日本海 ○○沖 / 天神崎先端">
+      <button class="btn secondary" onclick="getGPS()">GPS取得</button><div id="gpsText" class="muted small"></div>
+      <div class="row"><div><label>予報元</label><select id="source"><option>Windy</option><option>Yahoo!天気</option><option>海天気.jp</option><option>tenki.jp</option><option>その他</option></select></div><div><label>予報の時点</label><select id="forecastTiming"><option>前日夜</option><option>当日朝</option><option>出発直前</option><option>現地到着前</option></select></div></div>
+      <div class="row3"><div><label>予報風向</label><select id="fDir"><option>北</option><option>北東</option><option>東</option><option>南東</option><option>南</option><option>南西</option><option>西</option><option>北西</option><option>不明</option></select></div><div><label>予報風速 m/s</label><input id="fSpeed" type="number" step="0.1" placeholder="4"></div><div><label>予報突風 m/s</label><input id="fGust" type="number" step="0.1" placeholder="7"></div></div>
+      <div class="row"><div><label>現地の風</label><select id="actualStrength"><option>予報より弱い</option><option>ほぼ予報通り</option><option>予報より強い</option><option>かなり強い</option></select></div><div><label>現地風速 m/s 任意</label><input id="aSpeed" type="number" step="0.1" placeholder="未測定OK"></div></div>
+      <div class="row"><div><label>風向のズレ</label><select id="dirGap"><option>予報通り</option><option>右にズレ</option><option>左にズレ</option><option>巻いている</option><option>不明</option></select></div><div><label>突風</label><select id="gust"><option>なし</option><option>たまにある</option><option>多い</option><option>危険レベル</option></select></div></div>
+      <div class="row"><div><label>止む瞬間</label><select id="lull"><option>なし</option><option>たまに止む</option><option>止む時間が多い</option></select></div><div><label>波/うねり</label><select id="wave"><option>問題なし</option><option>少し気になる</option><option>厳しい</option><option>危険</option></select></div></div>
+      <div class="row"><div><label>釣行可否</label><select id="go"><option>快適にできる</option><option>できる</option><option>厳しい</option><option>無理</option></select></div><div><label>快適度</label><select id="comfort"><option>快適</option><option>普通</option><option>寒い/暑いが可能</option><option>不快</option><option>危険</option></select></div></div>
+      <label>日差し・気温湿度・体感メモ</label><textarea id="comfortMemo" placeholder="例：風で体感寒い / 湿度高く蒸す / 日差し強い"></textarea>
+      <label>メモ</label><textarea id="memo" placeholder="例：船が流されやすい、横風でラインが入らない"></textarea>
+      <button class="btn" onclick="saveLog()">保存する</button>
+    </div>
+  </section>
+
+  <section id="history" class="screen"><div class="hero"><h1>履歴</h1><p>保存したログ</p></div><div class="card"><div class="topActions"><button class="btn secondary" onclick="renderHistory()">更新</button><button class="btn danger" onclick="clearAll()">全削除</button></div><div id="historyList"></div></div></section>
+  <section id="analysis" class="screen"><div class="hero"><h1>分析</h1><p>予報と現地の傾向</p></div><div class="card" id="analysisBox"></div><div class="card"><button class="btn secondary" onclick="exportCSV()">CSVを書き出す</button></div></section>
+</div>
+<nav class="tabs"><div class="tab active" onclick="show('home')">🏠<br>ホーム</div><div class="tab" onclick="show('input')">📝<br>入力</div><div class="tab" onclick="show('history')">📖<br>履歴</div><div class="tab" onclick="show('analysis')">📊<br>分析</div></nav>
+<script>
+const KEY='kazeyomi_v1_logs';let gps={lat:'',lng:'',acc:''};
+function logs(){return JSON.parse(localStorage.getItem(KEY)||'[]')}function setLogs(v){localStorage.setItem(KEY,JSON.stringify(v));renderAll()}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));['home','input','history','analysis'].forEach((x,i)=>{if(x===id)document.querySelectorAll('.tab')[i].classList.add('active')});renderAll()}
+function initDate(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());document.getElementById('dt').value=d.toISOString().slice(0,16)}
+function getGPS(){const t=document.getElementById('gpsText');if(!navigator.geolocation){t.textContent='GPS非対応';return}t.textContent='取得中...';navigator.geolocation.getCurrentPosition(p=>{gps={lat:p.coords.latitude.toFixed(6),lng:p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)};t.textContent=`緯度 ${gps.lat} / 経度 ${gps.lng} / 精度 ${gps.acc}m`;},e=>{t.textContent='GPS取得失敗：Safariの位置情報許可を確認';},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
+function v(id){return document.getElementById(id).value}
+function saveLog(){const item={id:Date.now(),created:new Date().toISOString(),dt:v('dt'),style:v('style'),place:v('place'),lat:gps.lat,lng:gps.lng,acc:gps.acc,source:v('source'),forecastTiming:v('forecastTiming'),fDir:v('fDir'),fSpeed:v('fSpeed'),fGust:v('fGust'),actualStrength:v('actualStrength'),aSpeed:v('aSpeed'),dirGap:v('dirGap'),gust:v('gust'),lull:v('lull'),wave:v('wave'),go:v('go'),comfort:v('comfort'),comfortMemo:v('comfortMemo'),memo:v('memo')};if(!item.place){alert('場所名だけ入力してください');return}const arr=logs();arr.unshift(item);setLogs(arr);alert('保存しました');show('history')}
+function renderHome(){const arr=logs();document.getElementById('count').textContent=arr.length;const ok=arr.filter(x=>x.go==='快適にできる'||x.go==='できる').length;document.getElementById('goRate').textContent=arr.length?Math.round(ok/arr.length*100)+'%':'-';document.getElementById('latest').innerHTML=arr[0]?formatLog(arr[0]):'まだ記録がありません。'}
+function cls(go){return go==='快適にできる'||go==='できる'?'ok':go==='厳しい'?'warn':'ng'}
+function formatLog(x){return `<div class="log"><h3>${x.place} <span class="badge ${cls(x.go)}">${x.go}</span></h3><div class="muted">${x.dt||''} / ${x.style} / ${x.source} ${x.forecastTiming}</div><div>予報 ${x.fDir} ${x.fSpeed||'-'}m 突風${x.fGust||'-'}m → 現地 ${x.actualStrength} / ${x.dirGap}</div><div class="muted">突風:${x.gust} 止む:${x.lull} 波:${x.wave} 快適:${x.comfort}</div>${x.memo?`<div>${x.memo}</div>`:''}</div>`}
+function renderHistory(){const arr=logs();document.getElementById('historyList').innerHTML=arr.length?arr.map(x=>formatLog(x)+`<button class="btn danger" onclick="deleteLog(${x.id})">このログを削除</button>`).join(''):'<p class="muted">まだ記録がありません。</p>'}
+function deleteLog(id){if(confirm('削除しますか？'))setLogs(logs().filter(x=>x.id!==id))}function clearAll(){if(confirm('全ログを削除しますか？'))setLogs([])}
+function renderAnalysis(){const arr=logs();if(!arr.length){document.getElementById('analysisBox').innerHTML='<p class="muted">まだ分析できるデータがありません。</p>';return}const byPlace={};arr.forEach(x=>{byPlace[x.place]=byPlace[x.place]||[];byPlace[x.place].push(x)});let html='<h2>場所別</h2>';Object.entries(byPlace).forEach(([p,a])=>{const ok=a.filter(x=>x.go==='快適にできる'||x.go==='できる').length;html+=`<div class="pill">${p}：${a.length}件 / 可能率${Math.round(ok/a.length*100)}%</div>`});const stronger=arr.filter(x=>x.actualStrength.includes('強い')).length;html+=`<h2>全体傾向</h2><p>予報より強い：${stronger}/${arr.length}件</p>`;document.getElementById('analysisBox').innerHTML=html}
+function renderAll(){renderHome();renderHistory();renderAnalysis()}
+function exportCSV(){const arr=logs();if(!arr.length){alert('出力するデータがありません');return}const headers=Object.keys(arr[0]);const esc=s=>'"'+String(s??'').replaceAll('"','""')+'"';const csv=[headers.join(','),...arr.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='kazeyomi_logs.csv';a.click();URL.revokeObjectURL(url)}
+initDate();renderAll();
+</script>
+</body>
+</html>
